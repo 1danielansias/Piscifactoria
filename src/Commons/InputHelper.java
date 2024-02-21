@@ -120,7 +120,7 @@ public final class InputHelper {
         while(op == Integer.MIN_VALUE) {
             try {
                 op = sc.nextInt();
-                if((op < min || op > max) && !inExtra(extra, op));
+                if((op < min || op > max) && !inExtra(extra, op))
                 {
                     System.out.println(err);
                     op = Integer.MIN_VALUE;

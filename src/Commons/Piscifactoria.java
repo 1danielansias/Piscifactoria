@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 import Peces.*;
+import Registros.Registro;
 
 /**
  * Clase que efectúa la lógica de la piscifactoría.
@@ -305,6 +306,8 @@ public class Piscifactoria {
                 if (!t.peces.get(i).isVivo()) {
                     t.peces.remove(i);
                 }
+                // Registrar
+                Registro.registrar("Limpiado el tanque " + (i + 1) + " de la piscifactoria " + this.nombre);
             }
         }
         System.out.println("Peces muertos eliminados de los tanques de " + this.nombre);

@@ -93,7 +93,7 @@ public class Simulador {
         // se añade al array de piscifactorías
         piscifactorias.add(inicial);
         // se inicializan el número de monedas a 100 en el Monedero
-        Monedero.sumar(100);
+        Monedero.sumar(1000);
 
         // Registrar inicio de partida en transcriptor y log
         Registro.registrarInicioPartida(nombreEmpresa, String.valueOf(Monedero.dinero), peces, nombrePisc);
@@ -139,13 +139,9 @@ public class Simulador {
         System.out.println("13. Pasar varios días");
         System.out.println("14. Salir");
 
-        // Opciones ocultas??
-        /**
-         * int[] opcionesOcultas = { 99 };
-         * int opcion = InputHelper.inputMenu(1, 14, opcionesOcultas, "Introduzca un
-         * valor entre 1 y 14.");
-         */
-        int opcion = InputHelper.inputOption(1, 14, "Introduzca un valor entre 1 y 14.");
+
+        int[] opcionesOcultas = { 99 };
+        int opcion = InputHelper.inputMenu(1, 14, opcionesOcultas, "Introduzca un valor entre 1 y 14.");
 
         switch (opcion) {
             case -1:
@@ -367,8 +363,10 @@ public class Simulador {
             if (opcion != 0) {
                 // método para añadir el pez al tanque seleccionado
                 tanquesDisponibles.get(opcion - 1).addFish(pezSelec);
-                // RESTAR DINERO
+                // Restar dinero
                 Monedero.restar(pezSelec.getDatosPez().getCoste());
+                // Registrar compra
+                Registro.registrarNuevoPez(pezSelec.getDatosPez().getNombre(), pezSelec.getSexoString(), tanquesDisponibles.get(opcion - 1).toString(), String.valueOf(pezSelec.getDatosPez().getCoste()));
             } else {
                 System.out.println("Operación cancelada.");
             }
@@ -487,6 +485,8 @@ public class Simulador {
             totalDineroGanado += ventasTotal[1];
             System.out
                     .println(totalPecesVendidos + " peces vendidos por un total de " + totalDineroGanado + " monedas.");
+            // Registrar venta
+
         } else {
             System.out.println("Operación cancelada.");
         }
@@ -514,6 +514,8 @@ public class Simulador {
             p.tanques.get(tanqueSeleccionado).peces.clear();
             System.out.println("Tanque vaciado");
             System.out.println("Ocupación del tanque: " + p.tanques.get(tanqueSeleccionado).peces.size());
+            // Registro
+            Registro.registrar("Vaciado el tanque " + (tanqueSeleccionado + 1) + " de la piscifactoria " + p.getNombre());
         } else {
             System.out.println("Operación cancelada.");
         }
@@ -621,6 +623,8 @@ public class Simulador {
             System.out.println("Nueva piscifactoría " + nombre + " añadida!");
             // Restar el dinero del monedero
             Monedero.restar(precioFinal);
+            // Registrar
+            Registro.registrarNuevaPiscifactoria(tipo, piscifactorias.size(), precio);
         } else {
             System.out.println("No dipones del dinero suficiente.");
         }

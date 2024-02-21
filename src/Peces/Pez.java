@@ -96,6 +96,19 @@ public abstract class Pez {
     }
 
     /**
+     * Devuelve el sexo del pez en un String.
+     * 
+     * @return Sexo del pez.
+     */
+    public String getSexoString() {
+        if (sexo = true) {
+            return "M";
+        } else {
+            return "H";
+        }
+    }
+
+    /**
      * @param sexo Sexo del pez.
      */
     public void setSexo(boolean sexo) {

@@ -16,7 +16,7 @@ public class Tanque<T extends Pez> {
     /** Capacidad del tanque. */
     protected int capacidad;
     /** Referencia a la piscifactoria a la que pertenece el tanque. */
-    Piscifactoria piscifactoria;
+    protected Piscifactoria piscifactoria;
 
     /**
      * Constructor parametrizado
@@ -28,6 +28,14 @@ public class Tanque<T extends Pez> {
         this.capacidad = capacidad;
         this.peces = new ArrayList<>();
         this.piscifactoria = p;
+    }
+
+    /**
+     * 
+     * @return La piscifactoria a la que pertenece el tanque.
+     */
+    public Piscifactoria getPiscifactoria() {
+        return piscifactoria;
     }
 
     /**
@@ -143,6 +151,22 @@ public class Tanque<T extends Pez> {
             }
         }
         return contador;
+    }
+
+    /**
+     * Devuelve el indice del tanque dentro de la piscifactoría.
+     * 
+     * @return Indice del tanque.
+     */
+    public int getTankIndex() {
+        int index = 1;
+        for (Tanque<? extends Pez> tanque : piscifactoria.getTanques()) {
+            if (this == tanque) {
+                break;
+            }
+            index++;
+        }
+        return index;
     }
 
     /**
@@ -306,4 +330,11 @@ public class Tanque<T extends Pez> {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "tanque " + this.getTankIndex() + " de la piscifactoría " + this.piscifactoria.getNombre();
+    }
+
+    
 }

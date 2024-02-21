@@ -34,20 +34,45 @@ class Logger {
     }
 
     /**
-     * Registro 
+     * Log inicial de la partida.
      * 
      * @param nombrePartida Nombre de la partida.
      * @param piscifactoriaInicial Nombre de la piscifactoría inicial.
      */
     public void logInicial(String nombrePartida, String piscifactoriaInicial) {
         String fecha = getFecha();
-        registrar("[" + fecha + "] Inicio de la simulación " + nombrePartida + ".");
-        registrar("[" + fecha + "] Piscifactoría inicial: " + piscifactoriaInicial + ".");
+        registrar("Inicio de la simulación " + nombrePartida + ".");
+        registrar("Piscifactoría inicial: " + piscifactoriaInicial + ".");
     }
 
+    /**
+     * Log de comida comprada.
+     * 
+     * @param comidaComprada Cantidad de comida comprada por el usuario.
+     * @param alamacenadoEn Lugar donde se almacena la comida.
+     */
     public void registrarCompraComida(String comidaComprada, String alamacenadoEn) {
         String fecha = getFecha();
-        registrar("[" + fecha + "]" + comidaComprada + " de comida comprada. Se almacena en " + alamacenadoEn + ".");
+        registrar(comidaComprada + " de comida comprada. Se almacena en " + alamacenadoEn + ".");
+    }
+
+    /**
+     * Log de nuevo pez comprado.
+     * 
+     * @param nombrePez Nombre del pez.
+     * @param sexo Sexo del pez.
+     * @param tanque Tanque en el que se almacena el pez.
+     */
+    public void registrarNuevoPez(String nombrePez, String sexo, String tanque) {
+        registrar(nombrePez + " (" + sexo + ") comprado. Añadido al " + tanque);
+    }
+
+    public void registrarVenta(int numPeces, String piscifactoria) {
+        registrar("Vendidos " + numPeces + " peces de la piscifactoría " + piscifactoria + " de forma manual.");
+    }
+
+    public void registrarNuevoPiscifactoria(String piscifactoria, int numPisc) {
+        registrar("Comprada la piscifactoria de " + piscifactoria + " " + numPisc);
     }
 
     /**
@@ -57,7 +82,7 @@ class Logger {
      */
     public void registrar(String mensaje) {
         try {
-            writer.write(mensaje);
+            writer.write("[" + getFecha() + "] " + mensaje);
             writer.newLine();
             writer.flush();
         } catch (IOException e) {
