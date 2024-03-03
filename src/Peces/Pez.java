@@ -3,8 +3,8 @@ package Peces;
 import java.util.Random;
 import Commons.AlmacenCentral;
 import Commons.Piscifactoria;
-import Commons.Simulador;
 import Commons.Tanque;
+import com.google.gson.JsonObject;
 import propiedades.PecesDatos;
 
 /**
@@ -157,10 +157,9 @@ public abstract class Pez {
      * @param tanque Tanque de la piscifactoría.
      */
     public void grow(Tanque<? extends Pez> tanque) {
-        Simulador sim = new Simulador();
-        // modificacion P2, 5% de probabilidad de morir cada día par antes de madurez
+        // modificacion P2, 5% de probabilidad de morir cada día par (del pez) antes de madurez
         // hacer antes?
-        if (!this.maduro && (sim.getDiasPasados() % 2 == 0)) {
+        if (!this.maduro && (this.edad % 2 == 0)) {
             Random rand = new Random();
             double probabilidadMuerte = 0.05; // 5% de probabilidad de morir
             if (rand.nextDouble() < probabilidadMuerte) {
@@ -247,20 +246,26 @@ public abstract class Pez {
         this.ciclo = this.getDatosPez().getCiclo();
     }
 
+    /**
+     * Convierte un pez en un objeto de tipo JSON.
+     *
+     * @return Objeto JSON del pez.
+     */
+    public JsonObject convertirAJson() {
+        JsonObject jsonPez = new JsonObject();
+        jsonPez.addProperty("edad", edad);
+        jsonPez.addProperty("sexo", sexo);
+        jsonPez.addProperty("vivo", vivo);
+        jsonPez.addProperty("maduro", maduro);
+        jsonPez.addProperty("fertil", fertil);
+        jsonPez.addProperty("ciclo", ciclo);
+        jsonPez.addProperty("alimentado", alimentado);
+        return jsonPez;
+    }
+
     /** método abstracto que se encarga de obtener una instancia del objeto */
     public abstract Pez getInstance();
 
     /** método abstracto que se encarga de la alimentación específica de cada pez */
     public abstract void alimentar(Tanque<? extends Pez> tanque);
 }
-
-/**
- * REPRODUCCIÓN:
- * 
- * 1. Comprobar si hay espacio en el tanque para que se pueda reproducir
- * 2. Si hay 2 espacios disponibles y 3 huevos, se rellenan 2 espacios
- * 3. Comprobar si el pez es fértil
- * Después de la reproducción, es necesario reestablecer el ciclo del pez (de
- * cuántos? todos?)
- * Si no se reproducen porque no hay espacio, se resetean sus ciclos igualmente?
- */

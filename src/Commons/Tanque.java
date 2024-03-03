@@ -3,6 +3,8 @@ package Commons;
 import java.util.ArrayList;
 import java.util.Iterator;
 import Peces.Pez;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /**
  * Clase que representa el lugar en el que se almacenan los peces.
@@ -329,6 +331,27 @@ public class Tanque<T extends Pez> {
                 }
             }
         }
+    }
+
+    /**
+     * Convierte un tanque en un objeto de tipo JSON.
+     *
+     * @return Objeto JSON del tanque.
+     */
+    public JsonObject convertirAJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("capacidad", this.getCapacidad());
+        json.addProperty("numPeces", this.getNumPeces());
+        json.addProperty("pecesVivos", this.pecesVivos());
+        json.addProperty("pecesMaduros", this.pecesAdultos());
+        json.addProperty("pecesFertiles", this.pecesFertiles());
+
+        JsonArray jsonArrayPeces = new JsonArray();
+        for (Pez pez : this.peces) {
+            jsonArrayPeces.add(pez.convertirAJson());
+        }
+        json.add("peces", jsonArrayPeces);
+        return json;
     }
 
     @Override

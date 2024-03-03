@@ -1,7 +1,16 @@
 {
     "java.project.sourcePaths": ["src"],
     "java.project.outputPath": "bin",
-    "java.project.referencedLibraries": [
-        "lib/**/*.jar"
-    ]
+    "java.project.referencedLibraries": {
+        "include": [
+            "lib/**/*.jar",
+            "f:\\2ºDAM\\AD\\Proyecto Piscifactoría\\dom4j-2.1.4.jar",
+            "x:\\2ºDAM\\AD\\Proyecto Piscifactoría\\dom4j-2.1.4.jar",
+            "x:\\2ºDAM\\AD\\Proyecto Piscifactoría\\gson-2.10.1.jar",
+            "x:\\2ºDAM\\AD\\Proyecto Piscifactoría\\Orca_lib_1.2.1.jar"
+        ],
+        "exclude": [
+            "lib/Orca_lib.jar"
+        ]
+    }
 }

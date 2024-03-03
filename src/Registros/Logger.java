@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Clase que efectúa la lógica de registro de logs.
+ * 
+ * @author Daniel Ansias
+ */
 class Logger {
     private static final String FORMATO_FECHA = "yyyy-MM-dd HH:mm:ss";
     private BufferedWriter writer = null;
@@ -18,6 +23,7 @@ class Logger {
         try {
             writer = new BufferedWriter(new FileWriter(f, true));
         } catch (IOException e) {
+            Registro.registrarEnLog("Error al crear el stream de escritura de datos de logs.");
             e.printStackTrace();
         }
     }
@@ -67,12 +73,51 @@ class Logger {
         registrar(nombrePez + " (" + sexo + ") comprado. Añadido al " + tanque);
     }
 
+    /**
+     * Log de venta de peces.
+     * 
+     * @param numPeces Número de peces vendidos.
+     * @param piscifactoria Piscifactoria correspondiente.
+     */
     public void registrarVenta(int numPeces, String piscifactoria) {
         registrar("Vendidos " + numPeces + " peces de la piscifactoría " + piscifactoria + " de forma manual.");
     }
 
+    /**
+     * Log de compra de piscifactoria.
+     * 
+     * @param piscifactoria Nombre de la nueva piscifactoria.
+     * @param numPisc Número de la piscifactoria.
+     */
     public void registrarNuevoPiscifactoria(String piscifactoria, int numPisc) {
         registrar("Comprada la piscifactoria de " + piscifactoria + " " + numPisc);
+    }
+
+    /**
+     * Log de compra de nuevo tanque.
+     * 
+     * @param piscifactoria Piscifactoria correspondiente.
+     */
+    public void registrarNuevoTanque(String piscifactoria) {
+        registrar("Comprado un tanque para la piscifactoria " + piscifactoria + ".");
+    }
+
+    /**
+     * Log de compra de mejora de comida.
+     * 
+     * @param piscifactoria Piscifactoria correspondiente.
+     */
+    public void registrarMejoraComida(String piscifactoria) {
+        registrar("Mejorada la piscifactoria " + piscifactoria + " aumentando su capacidad de comida.");
+    }
+
+    /**
+     * Log de dia pasado.
+     * 
+     * @param dia Dia finalizado.
+     */
+    public void registrarDiaPasado(int dia) {
+        registrar("Fin del dia " + dia);
     }
 
     /**
@@ -86,6 +131,7 @@ class Logger {
             writer.newLine();
             writer.flush();
         } catch (IOException e) {
+            Registro.registrarEnLog("Error de escritura del fichero de logs.");
             e.printStackTrace();
         }
     }
@@ -98,6 +144,7 @@ class Logger {
             try {
                 writer.close();
             } catch (IOException e) {
+                Registro.registrarEnLog("Error al cerrar el stream de escritura de datos de logs.");
                 e.printStackTrace();
             }
         }

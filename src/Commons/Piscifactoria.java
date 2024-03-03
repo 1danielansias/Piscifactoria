@@ -1,35 +1,53 @@
 package Commons;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
+
 import Peces.*;
 import Registros.Registro;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /**
  * Clase que efectúa la lógica de la piscifactoría.
- * 
+ *
  * @author Daniel Ansias
  */
 public class Piscifactoria {
-    /** Objeto Scanner para las entradas del usuario. */
+    /**
+     * Objeto Scanner para las entradas del usuario.
+     */
     protected Scanner sc = new Scanner(System.in);
-    /** Lista de tanques en la piscifactoría. */
+    /**
+     * Lista de tanques en la piscifactoría.
+     */
     protected ArrayList<Tanque<? extends Pez>> tanques;
-    /** Nombre de la piscifactoría. */
+    /**
+     * Nombre de la piscifactoría.
+     */
     protected String nombre;
-    /** Tipo de piscifactoría. */
+    /**
+     * Tipo de piscifactoría.
+     */
     protected String tipo;
-    /** Cantidad máxima de comida que puede guardar el almacén */
+    /**
+     * Cantidad máxima de comida que puede guardar el almacén
+     */
     protected int comidaPiscifactoriaMax = 0;
-    /** Cantidad de comida disponible en el almacén */
+    /**
+     * Cantidad de comida disponible en el almacén
+     */
     protected int comidaDisponible = 0;
-    /** Número máximo de tanques que puede tener la piscifactoría */
+    /**
+     * Número máximo de tanques que puede tener la piscifactoría
+     */
     protected int tanquesMax = 10;
 
     /**
      * Constructor parametrizado.
-     * 
+     *
      * @param tipo   Tipo de piscifactoría.
      * @param nombre Nombre de la piscifactoría.
      */
@@ -96,9 +114,8 @@ public class Piscifactoria {
     }
 
     /**
-     * 
      * Método delegado para acceder directamente a los tanques del array.
-     * 
+     *
      * @param index Índice del tanque que se va a devolver.
      * @return El tanque seleccionado.
      */
@@ -106,20 +123,24 @@ public class Piscifactoria {
         return tanques.get(index);
     }
 
-    /** Crea un nuevo tanque y lo añade a la lista. */
-    public void crearTanque() {
+    /**
+     * Crea un nuevo tanque y lo añade a la lista.
+     */
+    public Tanque<Pez> crearTanque() {
+        Tanque<Pez> nuevoTanque = null;
         if (this.tipo.equals("rio")) {
-            Tanque<Pez> tanque = new Tanque<Pez>(25, this);
-            tanques.add(tanque);
+            nuevoTanque = new Tanque<Pez>(25, this);
+            tanques.add(nuevoTanque);
         } else if (this.tipo.equals("mar")) {
-            Tanque<Pez> tanque = new Tanque<Pez>(100, this);
-            tanques.add(tanque);
+            nuevoTanque = new Tanque<Pez>(100, this);
+            tanques.add(nuevoTanque);
         }
+        return nuevoTanque;
     }
 
     /**
      * Obtiene el total de peces vivos de una piscifactoría
-     * 
+     *
      * @return El total de peces vivos.
      */
     public int getTotalVivos() {
@@ -132,7 +153,7 @@ public class Piscifactoria {
 
     /**
      * Obtiene el total de peces alimentados de una piscifactoría
-     * 
+     *
      * @return El total de peces alimentados.
      */
     public int getTotalAlimentados() {
@@ -145,7 +166,7 @@ public class Piscifactoria {
 
     /**
      * Obtiene el total de peces adultos de una piscifactoría
-     * 
+     *
      * @return El total de peces adultos.
      */
     public int getTotalAdultos() {
@@ -158,7 +179,7 @@ public class Piscifactoria {
 
     /**
      * Obtiene el total de peces hembra de una piscifactoría
-     * 
+     *
      * @return El total de peces hembra.
      */
     public int getTotalHembras() {
@@ -171,7 +192,7 @@ public class Piscifactoria {
 
     /**
      * Obtiene el total de peces macho de una piscifactoría
-     * 
+     *
      * @return El total de peces macho.
      */
     public int getTotalMachos() {
@@ -184,7 +205,7 @@ public class Piscifactoria {
 
     /**
      * Obtiene el total de peces fertiles de una piscifactoría
-     * 
+     *
      * @return El total de peces fertiles.
      */
     public int getTotalFertiles() {
@@ -197,7 +218,7 @@ public class Piscifactoria {
 
     /**
      * Obtiene la capacidad total de los tanques de la piscifactoría.
-     * 
+     *
      * @return La capacidad total.
      */
     public int getCapacidadTotal() {
@@ -210,7 +231,7 @@ public class Piscifactoria {
 
     /**
      * Obtiene el total de peces en la piscifactoría.
-     * 
+     *
      * @return El total de peces en la piscifactoría.
      */
     public int getTotalPeces() {
@@ -221,29 +242,34 @@ public class Piscifactoria {
         return totalPeces;
     }
 
-    /** Muestra toda la información de la piscifactoría */
+    /**
+     * Muestra toda la información de la piscifactoría
+     */
     public void showStatus() {
+        DecimalFormat df = new DecimalFormat("#.##"); // Definir el formato
+
         System.out.println("=========" + this.nombre + "=========");
         System.out.println("Tanques: " + tanques.size());
-        double ocupacion = (getCapacidadTotal() != 0) ? ((double)getTotalPeces() / (double)getCapacidadTotal() * 100) : 0;
-        System.out.println("Ocupación: " + getTotalPeces() + "/" + getCapacidadTotal() +  " (" + ocupacion + "%)");
 
-        double pecesVivos = (getTotalPeces() != 0) ? ((double)getTotalVivos() / (double)getTotalPeces() * 100) : 0;
-        System.out.println("Peces vivos: " + getTotalVivos() + "/" + getTotalPeces() + " (" + pecesVivos + "%)");
+        double ocupacion = (getCapacidadTotal() != 0) ? ((double) getTotalPeces() / (double) getCapacidadTotal() * 100) : 0;
+        System.out.println("Ocupación: " + getTotalPeces() + "/" + getCapacidadTotal() + " (" + df.format(ocupacion) + "%)");
 
-        double pecesAlimentados = (getTotalVivos() != 0) ? ((double)getTotalAlimentados() / (double)getTotalVivos() * 100) : 0;
-        System.out.println("Peces alimentados: " + getTotalAlimentados() + "/" + getTotalVivos() + " (" + pecesAlimentados + "%)");
+        double pecesVivos = (getTotalPeces() != 0) ? ((double) getTotalVivos() / (double) getTotalPeces() * 100) : 0;
+        System.out.println("Peces vivos: " + getTotalVivos() + "/" + getTotalPeces() + " (" + df.format(pecesVivos) + "%)");
 
-        double pecesAdultos = (getTotalVivos() != 0) ? ((double)getTotalAdultos() / (double)getTotalVivos() * 100) : 0;
-        System.out.println("Peces adultos: " + getTotalAdultos() + "/" + getTotalVivos() + " (" + pecesAdultos + "%)");
+        double pecesAlimentados = (getTotalVivos() != 0) ? ((double) getTotalAlimentados() / (double) getTotalVivos() * 100) : 0;
+        System.out.println("Peces alimentados: " + getTotalAlimentados() + "/" + getTotalVivos() + " (" + df.format(pecesAlimentados) + "%)");
+
+        double pecesAdultos = (getTotalVivos() != 0) ? ((double) getTotalAdultos() / (double) getTotalVivos() * 100) : 0;
+        System.out.println("Peces adultos: " + getTotalAdultos() + "/" + getTotalVivos() + " (" + df.format(pecesAdultos) + "%)");
 
         System.out.println("Hembras/Machos: " + getTotalHembras() + "/" + getTotalMachos());
 
-        double pecesFertiles = (getTotalVivos() != 0) ? ((double)getTotalFertiles() / (double)getTotalVivos() * 100) : 0;
-        System.out.println("Fértiles: " + getTotalFertiles() + "/" + getTotalVivos() + " (" + pecesFertiles + "%)");
+        double pecesFertiles = (getTotalVivos() != 0) ? ((double) getTotalFertiles() / (double) getTotalVivos() * 100) : 0;
+        System.out.println("Fértiles: " + getTotalFertiles() + "/" + getTotalVivos() + " (" + df.format(pecesFertiles) + "%)");
 
-        double porcentajeComida = (comidaPiscifactoriaMax != 0) ? ((double)comidaDisponible / (double)comidaPiscifactoriaMax * 100) : 0;
-        System.out.println("Almacén de comida: " + comidaDisponible + "/" + comidaPiscifactoriaMax + " (" + porcentajeComida + "%)");
+        double porcentajeComida = (comidaPiscifactoriaMax != 0) ? ((double) comidaDisponible / (double) comidaPiscifactoriaMax * 100) : 0;
+        System.out.println("Almacén de comida: " + comidaDisponible + "/" + comidaPiscifactoriaMax + " (" + df.format(porcentajeComida) + "%)");
     }
 
     /**
@@ -257,7 +283,7 @@ public class Piscifactoria {
 
     /**
      * Muestra la información de todos los peces de un tanque determinado.
-     * 
+     *
      * @param index Índice del tanque del que se va a mostrar la información.
      */
     public void showFishStatus(int index) {
@@ -266,10 +292,10 @@ public class Piscifactoria {
 
     /**
      * Comprueba si un tanque es elegible para introducir un nuevo pez.
-     * 
+     *
      * @param pezSelec Pez seleccionado para introducir por el usuario.
      * @return ArrayList de los tanques disponible para introducir un pez
-     *         determinado.
+     * determinado.
      */
     public ArrayList<Tanque<? extends Pez>> comprobarPecesTanque(Pez pezSelec) {
         ArrayList<Tanque<? extends Pez>> tanquesDisponibles = new ArrayList<>();
@@ -296,7 +322,9 @@ public class Piscifactoria {
         return tanquesDisponibles;
     }
 
-    /** Elimina todos los peces muertos de los tanques de una piscifactoría */
+    /**
+     * Elimina todos los peces muertos de los tanques de una piscifactoría
+     */
     public void cleanTank() {
         // recorrer los tanques de la piscifactoria
         for (Tanque<? extends Pez> t : tanques) {
@@ -315,14 +343,16 @@ public class Piscifactoria {
 
     /**
      * Muestra la capacidad total de un tanque de la pisicfactoría.
-     * 
+     *
      * @param index Número del tanque.
      */
     public void showCapacity(int index) {
         tanques.get(index).showCapacity(index, this);
     }
 
-    /** Hace la lógica de pasar de día de todos los peces de la piscifactoría */
+    /**
+     * Hace la lógica de pasar de día de todos los peces de la piscifactoría
+     */
     public void nextDay() {
         for (Tanque<? extends Pez> t : tanques) {
             t.nextDay();
@@ -331,9 +361,9 @@ public class Piscifactoria {
 
     /**
      * Vende todos los peces de la piscifactoría que sean adultos y estén vivos
-     * 
+     *
      * @return Array con la cantidad de peces vendidos y cantidad de dinero
-     *         obtenido.
+     * obtenido.
      */
     public int[] sellFish() {
         // array para guardar el número de peces vendidos y el total ganado
@@ -350,7 +380,7 @@ public class Piscifactoria {
                     // aumentar los peces vendidos
                     ventas[0]++;
                     // sumar el dinero ganado --> Modificación, ahora dan la mitad de dinero de lo normal
-                    ventas[1] += (pez.getDatosPez().getMonedas()/2);
+                    ventas[1] += (pez.getDatosPez().getMonedas() / 2);
                     // quitar pez del array
                     iterator.remove();
                     // registrar la venta
@@ -361,11 +391,13 @@ public class Piscifactoria {
 
         }
         /**System.out.println(
-                "Piscifactoría " + this.nombre + ": " + ventas[0] + " vendidos por " + ventas[1] + " monedas");*/
+         "Piscifactoría " + this.nombre + ": " + ventas[0] + " vendidos por " + ventas[1] + " monedas");*/
         return ventas;
     }
 
-    /** Mejora el almacén de comida. */
+    /**
+     * Mejora el almacén de comida.
+     */
     public void upgradeFood() {
         if (tipo.equals("rio")) {
             System.out.println("Aumentar almacén en 25 unidades. 100 monedas. ");
@@ -378,6 +410,8 @@ public class Piscifactoria {
                     Monedero.restar(100);
                     System.out.println("Almacén de comida de la piscifactoría " + this.nombre
                             + " mejorado. Su capacidad ha aumentado en 25.");
+                    // Registrar operacion
+                    Registro.registrarMejoraComida(this.nombre, comidaPiscifactoriaMax, 100);
                 }
             } else {
                 System.out.println("No dispones del dinero suficiente.");
@@ -394,10 +428,36 @@ public class Piscifactoria {
                     Monedero.restar(200);
                     System.out.println("Almacén de comida de la piscifactoría " + this.nombre
                             + " mejorado. Su capacidad ha aumentado en 100.");
+                    // Registrar operacion
+                    Registro.registrarMejoraComida(this.nombre, comidaPiscifactoriaMax, 200);
                 }
             } else {
                 System.out.println("No dispones del dinero suficiente.");
             }
         }
+    }
+
+    /**
+     * Convierte una piscifactoría en un objeto de tipo JSON.
+     *
+     * @return Objeto JSON de la piscifactoría.
+     */
+    public JsonObject convertirAJson() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("nombre", this.nombre);
+        jsonObject.addProperty("tipo", this.tipo.equals("mar") ? 1 : 0);
+        jsonObject.addProperty("capacidad", this.comidaPiscifactoriaMax);
+
+        JsonObject jsonObjectComida = new JsonObject();
+        jsonObjectComida.addProperty("general", this.comidaDisponible);
+        jsonObject.add("comida", jsonObjectComida);
+
+        JsonArray jsonArrayTanques = new JsonArray();
+        for (Tanque<? extends Pez> t : tanques) {
+            jsonArrayTanques.add(t.convertirAJson());
+        }
+        jsonObject.add("tanques", jsonArrayTanques);
+
+        return jsonObject;
     }
 }
