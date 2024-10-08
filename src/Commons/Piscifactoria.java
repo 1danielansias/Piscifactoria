@@ -71,46 +71,48 @@ public class Piscifactoria {
         }
     }
 
-    /**
-     * @return El ArrayList de tanques de la piscifactoría.
-     */
     public ArrayList<Tanque<? extends Pez>> getTanques() {
         return tanques;
     }
 
-    /**
-     * @return El nombre de la piscifactoría.
-     */
     public String getNombre() {
         return nombre;
     }
 
-    /**
-     * @return El tipo de la piscifactoría.
-     */
     public String getTipo() {
         return tipo;
     }
 
-    /**
-     * @return La cantidad de comida máxima de la piscifactoría.
-     */
     public int getComidaPiscifactoriaMax() {
         return comidaPiscifactoriaMax;
     }
 
-    /**
-     * @return La cantidad de comida disponible en la piscifactoría.
-     */
     public int getComidaDisponible() {
         return comidaDisponible;
     }
 
-    /**
-     * @param comidaDisponible Comida disponible.
-     */
     public void setComidaDisponible(int comidaDisponible) {
         this.comidaDisponible = comidaDisponible;
+    }
+
+    public void setTanques(ArrayList<Tanque<? extends Pez>> tanques) {
+        this.tanques = tanques;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public void setComidaPiscifactoriaMax(int comidaPiscifactoriaMax) {
+        this.comidaPiscifactoriaMax = comidaPiscifactoriaMax;
+    }
+
+    public void setTanquesMax(int tanquesMax) {
+        this.tanquesMax = tanquesMax;
     }
 
     /**
@@ -390,9 +392,35 @@ public class Piscifactoria {
             }
 
         }
-        /**System.out.println(
-         "Piscifactoría " + this.nombre + ": " + ventas[0] + " vendidos por " + ventas[1] + " monedas");*/
         return ventas;
+    }
+
+    /**
+     * Método que vende todos los peces adultos de un tanque especificado.
+     *
+     * @param tankIndex Indice del tanque.
+     * @return Número de peces vendidos.
+     */
+    public int sellFishTank(int tankIndex) {
+        int pecesVendidos = 0;
+        Iterator<Pez> iterator = (Iterator<Pez>) tanques.get(tankIndex).peces.iterator();
+        while (iterator.hasNext()) {
+            Pez pez = iterator.next();
+            // comprobar si el pez está vivo y es adulto
+            if (pez.isVivo() && pez.isMaduro()) {
+                // aumentar los peces vendidos
+                pecesVendidos++;
+                // quitar pez del array
+                iterator.remove();
+                // registrar la venta
+                Simulador.estadisticas.registrarVenta(pez.getDatosPez().getNombre(),
+                        pez.getDatosPez().getMonedas());
+                // sumar el dindero
+                Monedero.sumar(pez.getDatosPez().getMonedas());
+            }
+        }
+        
+        return pecesVendidos;
     }
 
     /**

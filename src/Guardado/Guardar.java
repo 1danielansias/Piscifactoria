@@ -27,11 +27,11 @@ public class Guardar {
             if (!saveFile.exists()) {
                 saveFile.createNewFile();
             }
-            writer = new BufferedWriter(new FileWriter(saveFile));
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(saveFile), "UTF-8"));
             writer.write(gson.toJson(sim.partidaJsonObject()));
             writer.flush();
             // registrar guardado
-            Registro.registrar("Sistema guardado.");
+            Registro.registroLog("Sistema guardado.");
         } catch (IOException e) {
             Registro.registrarEnLog("Error al crear el fichero de guardado.");
             e.printStackTrace();

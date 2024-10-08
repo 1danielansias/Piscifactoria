@@ -7,10 +7,16 @@
             "f:\\2ºDAM\\AD\\Proyecto Piscifactoría\\dom4j-2.1.4.jar",
             "x:\\2ºDAM\\AD\\Proyecto Piscifactoría\\dom4j-2.1.4.jar",
             "x:\\2ºDAM\\AD\\Proyecto Piscifactoría\\gson-2.10.1.jar",
-            "x:\\2ºDAM\\AD\\Proyecto Piscifactoría\\Orca_lib_1.2.1.jar"
+            "x:\\2ºDAM\\AD\\Proyecto Piscifactoría\\Orca_lib_1.2.1.jar",
+            "f:\\2ºDAM\\AD\\Proyecto Piscifactoría\\gson-2.10.1.jar",
+            "f:\\2ºDAM\\AD\\Proyecto Piscifactoría\\Orca_lib_1.2.1.jar",
+            "x:\\2ºDAM\\AD\\Piscifactoría\\JAR\\dom4j-2.1.4.jar",
+            "x:\\2ºDAM\\AD\\Piscifactoría\\JAR\\gson-2.10.1.jar",
+            "x:\\2ºDAM\\AD\\Piscifactoría\\JAR\\Orca_lib_1.2.1.jar"
         ],
         "exclude": [
-            "lib/Orca_lib.jar"
+            "lib/Orca_lib.jar",
+            "lib/Orca_lib_1.2.1.jar"
         ]
     }
 }

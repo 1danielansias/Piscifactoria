@@ -1,0 +1,90 @@
+{
+  "implementados": [
+    "Arenque del Atlántico",
+    "Salmón atlántico",
+    "Carpa plateada",
+    "Perca europea",
+    "Pejerrey ",
+    "Lenguado europeo",
+    "Lubina rayada",
+    "Lucio del norte",
+    "Tilapia del Nilo",
+    "Trucha arcoíris",
+    "Besugo",
+    "Caballa"
+  ],
+  "empresa": "partida",
+  "dia": 3,
+  "monedas": 1030,
+  "orca": "0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0",
+  "edificios": {
+    "almacen": {
+      "disponible": false,
+      "capacidad": 200,
+      "comida": {
+        "general": 0
+      }
+    }
+  },
+  "piscifactorias": [
+    {
+      "nombre": "pisc1",
+      "tipo": 0,
+      "capacidad": 25,
+      "comida": {
+        "general": 22
+      },
+      "tanques": [
+        {
+          "pez": "Carpa plateada",
+          "num": 2,
+          "datos": {
+            "vivos": 2,
+            "maduros": 0,
+            "fertiles": 0
+          },
+          "peces": [
+            {
+              "edad": 2,
+              "sexo": false,
+              "vivo": true,
+              "maduro": false,
+              "fertil": false,
+              "ciclo": 5,
+              "alimentado": false
+            },
+            {
+              "edad": 2,
+              "sexo": true,
+              "vivo": true,
+              "maduro": false,
+              "fertil": false,
+              "ciclo": 5,
+              "alimentado": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nombre": "piscmar",
+      "tipo": 1,
+      "capacidad": 100,
+      "comida": {
+        "general": 100
+      },
+      "tanques": [
+        {
+          "pez": "",
+          "num": 0,
+          "datos": {
+            "vivos": 0,
+            "maduros": 0,
+            "fertiles": 0
+          },
+          "peces": []
+        }
+      ]
+    }
+  ]
+}

@@ -15,8 +15,10 @@ public class Tanque<T extends Pez> {
 
     /** Lista de peces dentro del tanque. */
     protected ArrayList<T> peces;
+
     /** Capacidad del tanque. */
     protected int capacidad;
+    
     /** Referencia a la piscifactoria a la que pertenece el tanque. */
     protected Piscifactoria piscifactoria;
 
@@ -63,6 +65,10 @@ public class Tanque<T extends Pez> {
      */
     public int getNumPeces() {
         return peces.size();
+    }
+
+    public void setPeces(ArrayList<T> peces) {
+        this.peces = peces;
     }
 
     /**
@@ -186,7 +192,7 @@ public class Tanque<T extends Pez> {
                 ((pecesVivos() != 0) ? ((pecesAlimentados() * 100) / pecesVivos()) : 0) + "%)");
         System.out.println("Peces adultos: " + pecesAdultos() + "/" + pecesVivos() + "(" +
                 ((pecesVivos() != 0) ? ((pecesAdultos() * 100) / pecesVivos()) : 0) + "%)");
-        System.out.println("Hembras/Machos: " + pecesMacho() + "/" + pecesHembra());
+        System.out.println("Hembras/Machos: " + pecesHembra() + "/" + pecesMacho());
         System.out.println("Fértiles: " + pecesFertiles() + "/" + pecesVivos());
     }
 
@@ -340,11 +346,14 @@ public class Tanque<T extends Pez> {
      */
     public JsonObject convertirAJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("capacidad", this.getCapacidad());
-        json.addProperty("numPeces", this.getNumPeces());
-        json.addProperty("pecesVivos", this.pecesVivos());
-        json.addProperty("pecesMaduros", this.pecesAdultos());
-        json.addProperty("pecesFertiles", this.pecesFertiles());
+        json.addProperty("pez", !this.estaVacio() ? this.peces.get(0).getDatosPez().getNombre() : "");
+        json.addProperty("num", this.getNumPeces());
+
+        JsonObject datos = new JsonObject();
+        datos.addProperty("vivos", this.pecesVivos());
+        datos.addProperty("maduros", this.pecesAdultos());
+        datos.addProperty("fertiles", this.pecesFertiles());
+        json.add("datos", datos);
 
         JsonArray jsonArrayPeces = new JsonArray();
         for (Pez pez : this.peces) {
@@ -358,6 +367,5 @@ public class Tanque<T extends Pez> {
     public String toString() {
         return "tanque " + this.getTankIndex() + " de la piscifactoría " + this.piscifactoria.getNombre();
     }
-
     
 }

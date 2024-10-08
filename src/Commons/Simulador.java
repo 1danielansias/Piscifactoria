@@ -1,37 +1,33 @@
 package Commons;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.*;
-
+import BBDD.Conexion;
+import BBDD.DAOPedidos;
+import BBDD.GeneradorBD;
+import BBDD.Pedido;
 import Guardado.Guardar;
+import Peces.Especies.*;
+import Peces.IMar;
+import Peces.IRio;
+import Peces.Pez;
+import Recompensas.Generador;
+import Recompensas.RecompensasHelper;
+import Registros.Registro;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.stream.JsonReader;
+import estadisticas.Estadisticas;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-
-import Peces.*;
-import Peces.Especies.ArenqueDelAtlantico;
-import Peces.Especies.Besugo;
-import Peces.Especies.Caballa;
-import Peces.Especies.CarpaPlateada;
-import Peces.Especies.LenguadoEuropeo;
-import Peces.Especies.LubinaRayada;
-import Peces.Especies.LucioDelNorte;
-import Peces.Especies.Pejerrey;
-import Peces.Especies.PercaEuropea;
-import Peces.Especies.SalmonAtlantico;
-import Peces.Especies.TilapiaDeNilo;
-import Peces.Especies.TruchaArcoiris;
-import Recompensas.Generador;
-import Recompensas.RecompensasHelper;
-import Registros.Registro;
-import estadisticas.Estadisticas;
 import propiedades.AlmacenPropiedades;
+import propiedades.PecesDatos;
+
+import java.io.*;
+import java.text.DecimalFormat;
+import java.util.*;
 
 /**
  * Clase que efectúa la lógica del programa.
@@ -40,60 +36,67 @@ import propiedades.AlmacenPropiedades;
  */
 public class Simulador {
 
-    /** Estructuras de datos para almacenar las recompensas */
+    /** Guarda las recompensas del sistema en formato clave-valor. */
     protected Map<String, String> recompensasGuardadas = null;
+
+    /** Lista de archivos que contiene recompensas. */
     protected List<File> listaRecompensas2 = null;
 
-    /**
-     * Número de días pasados. Por defecto se inicializa a 1.
-     */
+    /** Número de días pasados. */
     protected int numeroDias = 1;
-    /**
-     * Piscifactorías guardadas.
-     */
+
+    /** Lista de piscifactorías. */
     protected ArrayList<Piscifactoria> piscifactorias;
-    /**
-     * Nombre de la empresa.
-     */
+
+    /** Nombre de la empresa. */
     protected String nombreEmpresa;
-    /**
-     * Almacen central. Se inicializará en caso de que el usuario compre un almacén.
-     */
+
+    /** Nombre de la piscifactoría inicial */
+    protected String nombrePisc;
+
+    /** Objeto de la clase Almacen Central. */
     public AlmacenCentral almacenCentral = null;
-    /**
-     * Objeto Scanner para las entradas del usuario.
-     */
+
+    /** Objeto Scanner para la entrada de datos */
     protected Scanner sc;
-    /**
-     * Número de la piscifactoría seleccionada.
-     */
-    protected int piscSelec;
-    /**
-     * Array de peces implementados.
-     */
-    protected static String[] peces = {AlmacenPropiedades.ARENQUE_ATLANTICO.getNombre(),
+
+    /** Array de nombres de los peces implementados en el sistema. */
+    protected static String[] peces = { AlmacenPropiedades.ARENQUE_ATLANTICO.getNombre(),
             AlmacenPropiedades.SALMON_ATLANTICO.getNombre(),
             AlmacenPropiedades.CARPA_PLATEADA.getNombre(), AlmacenPropiedades.PERCA_EUROPEA.getNombre(),
             AlmacenPropiedades.PEJERREY.getNombre(), AlmacenPropiedades.LENGUADO_EUROPEO.getNombre(),
             AlmacenPropiedades.LUBINA_RAYADA.getNombre(), AlmacenPropiedades.LUCIO_NORTE.getNombre(),
             AlmacenPropiedades.TILAPIA_NILO.getNombre(), AlmacenPropiedades.TRUCHA_ARCOIRIS.getNombre(),
-            AlmacenPropiedades.BESUGO.getNombre(), AlmacenPropiedades.CABALLA.getNombre()};
+            AlmacenPropiedades.BESUGO.getNombre(), AlmacenPropiedades.CABALLA.getNombre() };
+
     /**
-     * Objeto de la clase Estadisticas
+     * Array de objetos PecesDatos que contiene los datos de los peces implementados
+     * en el sistema.
+     */
+    protected static PecesDatos[] pecesDatos = { AlmacenPropiedades.ARENQUE_ATLANTICO,
+            AlmacenPropiedades.SALMON_ATLANTICO,
+            AlmacenPropiedades.CARPA_PLATEADA, AlmacenPropiedades.PERCA_EUROPEA,
+            AlmacenPropiedades.PEJERREY, AlmacenPropiedades.LENGUADO_EUROPEO,
+            AlmacenPropiedades.LUBINA_RAYADA, AlmacenPropiedades.LUCIO_NORTE,
+            AlmacenPropiedades.TILAPIA_NILO, AlmacenPropiedades.TRUCHA_ARCOIRIS,
+            AlmacenPropiedades.BESUGO, AlmacenPropiedades.CABALLA };
+
+    /**
+     * Objeto de la clase Estadísticas inicializado en el array de nombres de peces.
      */
     public static Estadisticas estadisticas = new Estadisticas(peces);
-    /**
-     * Objeto de la clase Pez.
-     */
+
+    /** Objeto de la clase Pez, representa un pez seleccionado por el usuario. */
     protected Pez pezSelec;
-    /**
-     * Boolean que controla el final de la partida.
-     */
+
+    /** Indica si se ha alcanzado el fin de la partida. */
     protected boolean fin = false;
-    /**
-     * Generador de recompensas
-     */
-    Generador recompensas = new Generador();
+
+    /** Objeto de la clase Generador de recompensas. */
+    protected Generador recompensas = null;
+
+    /** Objeto de la clase DAOPedido para las consultas a la base de datos. */
+    protected DAOPedidos daoPedidos = null;
 
     public String getNombreEmpresa() {
         return nombreEmpresa;
@@ -101,29 +104,49 @@ public class Simulador {
 
     /**
      * Método que inicializa todo el sistema. Inicializa la piscifactoría inicial,
-     * añade 100 monedas al
-     * Monedero y muestra el menú principal.
+     * añade 100 monedas al Monedero y muestra el menú principal.
      */
     public void init() {
         sc = new Scanner(System.in);
-        System.out.println("Introduce el nombre de la empresa: ");
-        nombreEmpresa = sc.nextLine();
+
+        File directorio = new File(".\\Saves");
+        File[] ficheros = directorio.listFiles();
+
+        // cargar la partida si hay guardada
+        if (ficheros.length > 0) {
+            System.out.println("Cargando partida...");
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            load(ficheros[0]);
+            new Registro(nombreEmpresa);
+            System.out.println("Partida cargada");
+            Registro.registroLog("Sistema cargado");
+        } else {
+            System.out.println("Introduce el nombre de la empresa: ");
+            nombreEmpresa = sc.nextLine();
+            // se inicializa el Array de piscifactorías
+            piscifactorias = new ArrayList<>();
+            System.out.println("Introduce el nombre de la piscifactoría inicial: ");
+            nombrePisc = sc.nextLine();
+            // se crea la piscifactoria inicial
+            Piscifactoria inicial = new Piscifactoria("rio", nombrePisc);
+            // se añade al array de piscifactorías
+            piscifactorias.add(inicial);
+            // se inicializan el número de monedas a 100 en el Monedero
+            Monedero.sumar(100);
+            // Inicializar registros
+            new Registro(nombreEmpresa);
+        }
 
         crearCarpetas();
-
-        // inicializar objeto Registro
-        Registro registro = new Registro(nombreEmpresa);
-
-        // se inicializa el Array de piscifactorías
-        piscifactorias = new ArrayList<Piscifactoria>();
-        System.out.println("Introduce el nombre de la piscifactoría inicial: ");
-        String nombrePisc = sc.nextLine();
-        // se crea la piscifactoria inicial
-        Piscifactoria inicial = new Piscifactoria("rio", nombrePisc);
-        // se añade al array de piscifactorías
-        piscifactorias.add(inicial);
-        // se inicializan el número de monedas a 100 en el Monedero
-        Monedero.sumar(100);
+        recompensas = new Generador();
+        // generar los datos de la BD
+        GeneradorBD.generarDatos(pecesDatos);
+        // obtener instancia de DAOPedidos
+        daoPedidos = DAOPedidos.getInstance();
 
         // registrar inicio de partida en transcriptor y log
         Registro.registrarInicioPartida(nombreEmpresa, String.valueOf(Monedero.dinero), peces, nombrePisc);
@@ -137,12 +160,196 @@ public class Simulador {
         }
 
         Registro.registroLog("Cierre de la partida.");
-        // cerrar Streams de escritura al terminar la partida
-        Registro.cerrarStreams();
         // guardado al terminar la partida
         Guardar.guardarPartida(this);
         // cerrar el Scanner
         sc.close();
+    }
+
+    /**
+     * Obtiene los datos guardados en el fichero de guardado y establece los
+     * atributos del Simulador y objetos relacionados.
+     *
+     * @param saveFile Fichero de guardado.
+     */
+    public void load(File saveFile) {
+        Gson gson = new Gson();
+        JsonReader jsonReader = null;
+        try {
+            jsonReader = new JsonReader(
+                    new BufferedReader(new InputStreamReader(new FileInputStream(saveFile), "UTF-8")));
+            JsonObject jsonSimulador = gson.fromJson(jsonReader, JsonObject.class);
+
+            nombreEmpresa = jsonSimulador.get("empresa").getAsString();
+            numeroDias = jsonSimulador.get("dia").getAsInt();
+            Monedero.sumar(jsonSimulador.get("monedas").getAsInt());
+
+            JsonArray pecesImplementadosJArray = jsonSimulador.getAsJsonArray("implementados");
+            peces = new String[pecesImplementadosJArray.size()];
+            for (int i = 0; i < pecesImplementadosJArray.size(); i++) {
+                peces[i] = pecesImplementadosJArray.get(i).getAsString();
+            }
+
+            JsonObject almacenJson = jsonSimulador.getAsJsonObject("edificios").getAsJsonObject("almacen");
+            boolean almacenDisponible = almacenJson.get("disponible").getAsBoolean();
+            if (almacenDisponible) {
+                almacenCentral = new AlmacenCentral();
+                AlmacenCentral.almacenActivado = true;
+                AlmacenCentral.capacidad = almacenJson.get("capacidad").getAsInt();
+                AlmacenCentral.comidaDisponible = almacenJson.getAsJsonObject("comida").get("general").getAsInt();
+            }
+
+            JsonArray piscifactoriasJsonArray = jsonSimulador.getAsJsonArray("piscifactorias");
+            piscifactorias = new ArrayList<>();
+            for (int i = 0; i < piscifactoriasJsonArray.size(); i++) {
+                JsonObject piscifactoriaJson = piscifactoriasJsonArray.get(i).getAsJsonObject();
+                Piscifactoria piscifactoria = crearPiscifactoriaDesdeJson(piscifactoriaJson);
+                piscifactorias.add(piscifactoria);
+            }
+            nombrePisc = piscifactorias.get(0).nombre;
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            Registro.registrarEnLog("Eror al leer el JSON del fichero de guardado.");
+        } finally {
+            try {
+                jsonReader.close();
+            } catch (IOException e) {
+                Registro.registrarEnLog("Error al cerrar el stream de datos.");
+            }
+        }
+    }
+
+    /**
+     * Establece el valor de los atributos de un objeto Piscifactoría dado el
+     * contenido guardado en JSON.
+     * 
+     * @param jsonPiscifactoria Objeto JSON que contiene los datos guardados de la
+     *                          piscifactoría.
+     * @return Objeto de tipo Piscifactoria.
+     */
+    private Piscifactoria crearPiscifactoriaDesdeJson(JsonObject jsonPiscifactoria) {
+        String nombre = jsonPiscifactoria.get("nombre").getAsString();
+        String tipo = jsonPiscifactoria.get("tipo").getAsInt() == 0 ? "rio" : "mar";
+        int capacidad = jsonPiscifactoria.get("capacidad").getAsInt();
+        int comida = jsonPiscifactoria.getAsJsonObject("comida").get("general").getAsInt();
+
+        Piscifactoria p = new Piscifactoria(tipo, nombre);
+        p.setComidaPiscifactoriaMax(capacidad);
+        p.setComidaDisponible(comida);
+
+        JsonArray tanquesJsonArray = jsonPiscifactoria.getAsJsonArray("tanques");
+        ArrayList<Tanque<? extends Pez>> tanques = new ArrayList<>();
+        for (int i = 0; i < tanquesJsonArray.size(); i++) {
+            JsonObject jsonTanque = tanquesJsonArray.get(i).getAsJsonObject();
+            Tanque<?> tanque = crearTanqueDesdeJson(jsonTanque, p, tipo);
+            tanques.add(tanque);
+        }
+        p.setTanques(tanques);
+
+        return p;
+    }
+
+    /**
+     * Establece el valor de los atributos de un objeto Tanque dado el contenido
+     * guardado en JSON
+     * 
+     * @param jsonTanque Objeto JSON que contiene los datos guardados del tanque.
+     * @param p          Objeto de tipo Piscifactoría al que pertenece el tanque.
+     * @param tipo       Tipo de tanque, río o mar.
+     * @return Un objeto de tipo Tanque.
+     */
+    private Tanque<? extends Pez> crearTanqueDesdeJson(JsonObject jsonTanque, Piscifactoria p, String tipo) {
+        String tipoPez = jsonTanque.get("pez").getAsString().replaceAll("\\s+", "").trim();
+
+        int capacidadTanque = tipo.equals("rio") ? 25 : 100;
+        Tanque<Pez> t = new Tanque<>(capacidadTanque, p);
+
+        JsonArray pecesJsonArray = jsonTanque.getAsJsonArray("peces");
+        ArrayList<Pez> peces = new ArrayList<>();
+        for (int i = 0; i < pecesJsonArray.size(); i++) {
+            Pez pez = crearTipoPez(tipoPez);
+            JsonObject jsonPez = pecesJsonArray.get(i).getAsJsonObject();
+            crearPezDesdeJson(jsonPez, pez);
+            pez.setPiscifactoria(p);
+            peces.add(pez);
+        }
+        t.setPeces(peces);
+
+        return t;
+    }
+
+    /**
+     * Establece el valor de los atributos de un objeto Pez dado el contenido
+     * guardado en JSON.
+     * 
+     * @param jsonPez Objeto JSON que contiene los datos guardados del pez.
+     * @param pez     Objeto de tipo Pez.
+     */
+    private void crearPezDesdeJson(JsonObject jsonPez, Pez pez) {
+        int edad = jsonPez.get("edad").getAsInt();
+        boolean sexo = jsonPez.get("sexo").getAsBoolean();
+        boolean vivo = jsonPez.get("vivo").getAsBoolean();
+        boolean maduro = jsonPez.get("maduro").getAsBoolean();
+        boolean fertil = jsonPez.get("fertil").getAsBoolean();
+        int ciclo = jsonPez.get("ciclo").getAsInt();
+        boolean alimentado = jsonPez.get("alimentado").getAsBoolean();
+
+        pez.setEdad(edad);
+        pez.setSexo(sexo);
+        pez.setVivo(vivo);
+        pez.setMaduro(maduro);
+        pez.setFertil(fertil);
+        pez.setCiclo(ciclo);
+        pez.setAlimentado(alimentado);
+    }
+
+    /**
+     * Crea y devuelve un objeto de tipo Pez dado un String que representa el tipo
+     * de pez a crear.
+     * 
+     * @param tipoPez Tipo de pez a crear.
+     * @return Objeto de tipo pez.
+     */
+    private Pez crearTipoPez(String tipoPez) {
+        Pez pez = null;
+        switch (tipoPez) {
+            case "Carpaplateada":
+                pez = new CarpaPlateada(true, null);
+                break;
+            case "Pejerrey":
+                pez = new Pejerrey(true, null);
+                break;
+            case "Luciodelnorte":
+                pez = new LucioDelNorte(true, null);
+                break;
+            case "Percaeuropea":
+                pez = new PercaEuropea(true, null);
+                break;
+            case "TilapiadelNilo":
+                pez = new TilapiaDeNilo(true, null);
+                break;
+            case "ArenquedelAtlántico":
+                pez = new ArenqueDelAtlantico(true, null);
+                break;
+            case "Lubinarayada":
+                pez = new LubinaRayada(true, null);
+                break;
+            case "Caballa":
+                pez = new Caballa(true, null);
+                break;
+            case "Lenguadoeuropeo":
+                pez = new LenguadoEuropeo(true, null);
+                break;
+            case "Besugo":
+                pez = new Besugo(true, null);
+                break;
+            case "Truchaarcoíris":
+                pez = new TruchaArcoiris(true, null);
+                break;
+            case "Salmónatlántico":
+                pez = new SalmonAtlantico(true, null);
+                break;
+        }
+        return pez;
     }
 
     /**
@@ -174,7 +381,8 @@ public class Simulador {
     }
 
     /**
-     * Crea las carpetas necesarias para el guardado de logs, transcripciones, recompensas y guardado de partida.
+     * Crea las carpetas necesarias para el guardado de logs, transcripciones,
+     * recompensas y guardado de partida.
      */
     public void crearCarpetas() {
         // crear directorios de registros si no existen
@@ -214,10 +422,11 @@ public class Simulador {
         System.out.println("12. Mejorar");
         System.out.println("13. Canjear recompensa");
         System.out.println("14. Pasar varios días");
-        System.out.println("15. Salir");
+        System.out.println("15. Pedidos");
+        System.out.println("16. Salir");
 
-        int[] opcionesOcultas = {99, 101};
-        int opcion = InputHelper.inputMenu(1, 15, opcionesOcultas, "Introduzca un valor entre 1 y 14.");
+        int[] opcionesOcultas = { 99, 101, 102, 103 };
+        int opcion = InputHelper.inputMenu(1, 16, opcionesOcultas, "Introduzca un valor entre 1 y 16.");
 
         switch (opcion) {
             case -1:
@@ -270,8 +479,12 @@ public class Simulador {
                 showGeneralStatus();
                 break;
             case 15:
+                menuPedidos();
+                break;
+            case 16:
                 fin = true;
                 break;
+                
             // opciones ocultas
             case 99:
                 Monedero.sumar(1000);
@@ -281,10 +494,151 @@ public class Simulador {
             case 101:
                 recompensas.coinRewards(2);
                 Registro.registroLog("Recompensa recibida por opción oculta.");
-                recompensas.piscifactoriaMarReward("a");
+                recompensas.almacenReward("A");
                 Registro.registroLog("Recompensa recibida por opción oculta.");
-                recompensas.piscifactoriaMarReward("b");
-                Registro.registroLog("Recompensa recibida por opción oculta.");
+                break;
+            case 102:
+                daoPedidos.eliminarPedidos();
+                System.out.println("Pedidos eliminados de la BD");
+                break;
+            case 103:
+                showPedidos();
+                break;
+        }
+    }
+
+    /**
+     * Muestra un menú de selección de pedidos (ordenados por el nombre del pez
+     * solicitado) en caso de que haya.
+     */
+    public void menuPedidos() {
+        ArrayList<Pedido> pedidos = daoPedidos.getPedidos();
+        if (!pedidos.isEmpty()) {
+            // Ordenar los pedidos por el nombre del pez
+            Collections.sort(pedidos, new Comparator<Pedido>() {
+                @Override
+                public int compare(Pedido p1, Pedido p2) {
+                    return p1.getNombre_pez().compareTo(p2.getNombre_pez());
+                }
+            });
+
+            System.out.println("Selecciona una opción: (0 para cancelar)");
+            int indexPedido = 1;
+
+            for (Pedido pedido : pedidos) {
+                System.out.println(indexPedido + ". " + pedido);
+                indexPedido++;
+            }
+
+            int opcion = InputHelper.inputOption(0, pedidos.size(),
+                    "Introduzca un valor entre 0 y " + pedidos.size() + ".");
+
+            if (opcion != 0) {
+                enviarPeces(pedidos.get(opcion - 1));
+            }
+        } else {
+            System.out.println("No hay pedidos.");
+        }
+    }
+
+    /**
+     * Muestra un menú de selección de piscifactorias y tanques, permitiendo elegir
+     * uno y enviar los peces del mismo.
+     * Actualiza el pedido en la base de datos según el número de peces enviados.
+     * Genera una recompensa en caso de que se complete el pedido.
+     * 
+     * @param pedido Objecto de tipo Pedido que contiene los datos del mismo.
+     */
+    public void enviarPeces(Pedido pedido) {
+        // Seleccionar piscifactoria
+        int selectedPisc = selectPisc();
+        if (selectedPisc != -1) {
+            Piscifactoria p = piscifactorias.get(selectedPisc);
+            // Seleccionar tanque
+            int selectedTank = selectTank(p);
+            if (selectedTank != -1) {
+                // Comprobar que el tanque no esté vacío
+                if (!p.tanques.get(selectedTank).estaVacio()) {
+                    String pezTanque = p.tanques.get(selectedTank).getPeces().get(0).getDatosPez().getNombre();
+                    // Comprobar que el tipo de pez del tanque corresponda con el del pedido
+                    if (pezTanque.equals(pedido.getNombre_pez())) {
+                        // Vender los peces adultos del tanque
+                        int pecesEnviados = p.sellFishTank((selectedTank));
+                        // Actualizar cantidad enviada en el la base de datos
+                        daoPedidos.actualizarPedido(pedido.getId_pedido(), pecesEnviados);
+                        System.out.println(pecesEnviados + " peces envíados, el pedido ha sido actualizado.");
+                        Registro.registrar("Enviados " + pecesEnviados + " peces al pedido de " + pedido.getNombre_pez()
+                                + " con referencia " + pedido.getId_pedido() + ".");
+                        // Generar reward en caso de que se complete el pedido
+                        if (daoPedidos.isPedidoCompleto(pedido.getId_pedido())) {
+                            generarRecompensa();
+                            // Registrar pedido completado
+                            Registro.registrar("Pedido de " + pedido.getNombre_pez() + " con referencia "
+                                    + pedido.getId_pedido() + " enviado.");
+                        }
+                    } else {
+                        System.out.println(
+                                "El tipo de pez del tanque seleccionado no es válido para el envío. Operación cancelada.");
+                    }
+                } else {
+                    System.out.println("El tanque seleccionado está vacío. No se puede realizar el envío.");
+                }
+            }
+        } else {
+            System.out.println("Operación cancelada");
+        }
+    }
+
+    /**
+     * Genera una recompensa aleatoria dadas ciertas probabilidades.
+     */
+    public void generarRecompensa() {
+        int random = (int) (Math.random() * 100);
+        // 50% de probabilidad de recompensa de comida
+        if (random < 50) {
+            int nivel = (int) (Math.random() * 100);
+            // 60% de probabilidad de ser nivel 1
+            if (nivel < 60) {
+                recompensas.foodReward(1);
+                // 30% de probabilidad de ser nivel 2
+            } else if (nivel < 90) {
+                recompensas.foodReward(2);
+                // 10% de probabilidad de ser nivel 3
+            } else {
+                recompensas.foodReward(3);
+            }
+            // 40% de probabilidad de recompensa de monedas
+        } else if (random < 90) {
+            int nivel = (int) (Math.random() * 100);
+            if (nivel < 60) {
+                recompensas.coinRewards(1);
+            } else if (nivel < 90) {
+                recompensas.coinRewards(2);
+            } else {
+                recompensas.coinRewards(3);
+            }
+            // 10% de probabilidad de recompensa de tanque
+        } else {
+            int nivel = (int) (Math.random() * 100);
+            if (nivel < 60) {
+                recompensas.tanqueReward("r");
+            } else {
+                recompensas.tanqueReward("m");
+            }
+        }
+        System.out.println("¡Pedido completado, nueva recompensa obtenida!");
+        Registro.registroLog("Recompensa recibida por completar pedido.");
+    }
+
+    /**
+     * Muestra por pantalla la lista de todos los pedidos, completos e incompletos,
+     * por ordern de inserción en la BD.
+     */
+    public void showPedidos() {
+        ArrayList<Pedido> listaPedidos = daoPedidos.getAllPedidos();
+        System.out.println("---------- Pedidos ----------");
+        for (Pedido p : listaPedidos) {
+            System.out.println(p);
         }
     }
 
@@ -490,40 +844,40 @@ public class Simulador {
         if (opcion != 0) {
             switch (opcion) {
                 case 1:
-                    pezSelec = new CarpaPlateada(false, null);
+                    pezSelec = new CarpaPlateada(true, null);
                     break;
                 case 2:
-                    pezSelec = new Pejerrey(false, null);
+                    pezSelec = new Pejerrey(true, null);
                     break;
                 case 3:
-                    pezSelec = new LucioDelNorte(false, null);
+                    pezSelec = new LucioDelNorte(true, null);
                     break;
                 case 4:
-                    pezSelec = new PercaEuropea(false, null);
+                    pezSelec = new PercaEuropea(true, null);
                     break;
                 case 5:
-                    pezSelec = new TilapiaDeNilo(false, null);
+                    pezSelec = new TilapiaDeNilo(true, null);
                     break;
                 case 6:
-                    pezSelec = new ArenqueDelAtlantico(false, null);
+                    pezSelec = new ArenqueDelAtlantico(true, null);
                     break;
                 case 7:
-                    pezSelec = new LubinaRayada(false, null);
+                    pezSelec = new LubinaRayada(true, null);
                     break;
                 case 8:
-                    pezSelec = new Caballa(false, null);
+                    pezSelec = new Caballa(true, null);
                     break;
                 case 9:
-                    pezSelec = new LenguadoEuropeo(false, null);
+                    pezSelec = new LenguadoEuropeo(true, null);
                     break;
                 case 10:
-                    pezSelec = new Besugo(false, null);
+                    pezSelec = new Besugo(true, null);
                     break;
                 case 11:
-                    pezSelec = new TruchaArcoiris(false, null);
+                    pezSelec = new TruchaArcoiris(true, null);
                     break;
                 case 12:
-                    pezSelec = new SalmonAtlantico(false, null);
+                    pezSelec = new SalmonAtlantico(true, null);
                     break;
             }
             comprobaciones(pezSelec);
@@ -849,7 +1203,7 @@ public class Simulador {
      *
      * @param coste Coste de la operación a realizar.
      * @return True si se dispone del dinero suficiente para realizar la operación,
-     * false si no.
+     *         false si no.
      */
     public boolean comprobarDineroUpgrade(int coste) {
         if (Monedero.dinero >= coste) {
@@ -997,7 +1351,8 @@ public class Simulador {
     /**
      * Muestra un menú con las recompensas diponibles.
      *
-     * @param recompensasGuardadas Lista de los nombres y descripción de las recompensas.
+     * @param recompensasGuardadas Lista de los nombres y descripción de las
+     *                             recompensas.
      * @param listaRecompensas2    Lista de ficheros de recompensas.
      */
     public void menuRecompensas(Map<String, String> recompensasGuardadas, List<File> listaRecompensas2) {
@@ -1130,7 +1485,8 @@ public class Simulador {
                             Registro.registrarNuevoTanque(nuevoTanque.getTankIndex(), p.getNombre());
                         }
                     } else {
-                        System.out.println("No se puede introducir el tanque a esta piscifactoría. Operación cancelada.");
+                        System.out
+                                .println("No se puede introducir el tanque a esta piscifactoría. Operación cancelada.");
                     }
                 } else {
                     System.out.println("Operación cancelada.");
@@ -1153,7 +1509,8 @@ public class Simulador {
                             Registro.registrarNuevoTanque(nuevoTanque.getTankIndex(), p2.getNombre());
                         }
                     } else {
-                        System.out.println("No se puede introducir el tanque a esta piscifactoría. Operación cancelada.");
+                        System.out
+                                .println("No se puede introducir el tanque a esta piscifactoría. Operación cancelada.");
                     }
                 } else {
                     System.out.println("Operación cancelada.");
@@ -1353,6 +1710,12 @@ public class Simulador {
         if (AlmacenCentral.almacenActivado) {
             AlmacenCentral.distribuirComida(piscifactorias);
         }
+
+        // generación de pedidos cada 10 días
+        if (numeroDias % 10 == 0) {
+            daoPedidos.generarPedido();
+            System.out.println("Pedido generado.");
+        }
     }
 
     /**
@@ -1395,7 +1758,11 @@ public class Simulador {
         partidaJsonObject.add("dia", new JsonPrimitive(numeroDias));
         partidaJsonObject.add("monedas", new JsonPrimitive(Monedero.dinero));
         partidaJsonObject.add("orca", new JsonPrimitive(estadisticas.exportarDatos(peces)));
-        partidaJsonObject.add("edificios", almacenJsonObject());
+
+        JsonObject edificios = new JsonObject();
+        edificios.add("almacen", almacenJsonObject());
+        partidaJsonObject.add("edificios", edificios);
+
         JsonArray piscifactoriasJsonArray = new JsonArray();
         for (Piscifactoria p : piscifactorias) {
             piscifactoriasJsonArray.add(p.convertirAJson());
@@ -1412,7 +1779,12 @@ public class Simulador {
             Registro.registrarEnLog("Error durante la simulación.");
             e.printStackTrace();
         } finally {
+            // cerrar Streams de escritura al terminar la partida
             Registro.cerrarStreams();
+            // Cerrar PreparedStatements
+            DAOPedidos.getInstance().cerrarPS();
+            // Cerrar conexion con la base de datos
+            Conexion.closeConnection();
         }
     }
 }
